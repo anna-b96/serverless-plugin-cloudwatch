@@ -1,0 +1,9 @@
+# IDEs and editors
+/.idea
+*.iml
+
+# dependencies
+**/node_modules
+
+# outputs
+/.nyc_output

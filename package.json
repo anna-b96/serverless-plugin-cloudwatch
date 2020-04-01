@@ -1,0 +1,24 @@
+{
+  "name": "serverless-plugin-cloudwatch-widges",
+  "version": "0.1.0",
+  "description": "Generate CloudWatch Dashboard including widgets with configured metrics",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "nyc --all ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anna-b96/serverless-plugin-cloudwatch"
+  },
+  "keywords": [
+    "serverless",
+    "plugin"
+  ],
+  "author": "Anna Blendl",
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "^3.5.2",
+    "nyc": "^15.0.0",
+    "sinon": "^9.0.1"
+  }
+}
