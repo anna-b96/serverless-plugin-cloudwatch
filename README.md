@@ -41,18 +41,14 @@ The default configuration looks like this:
 dashboard:
   lambda:
     widgets:
-	-
-	 name: 'Sum of Invocations'
-	 metrics: 
-	   - 
-	    name: 'Invocations'
-	    stat: 'Sum'
-	-
-	 name: 'Sum of Errors',
-	 metrics: 
-	   -
-	    name: 'Erorrs'
-	    stat: 'Sum'
+      - name: 'Sum of Invocations'
+        metrics: 
+          - name: 'Invocations'
+            stat: 'Sum'
+      - name: 'Sum of Errors',
+        metrics: 
+          - name: 'Erorrs'
+            stat: 'Sum'
     enabled: true
 ```
 
