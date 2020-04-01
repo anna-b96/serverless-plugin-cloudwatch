@@ -27,30 +27,30 @@ The plugin can be configured by adding a property called `dashboard` to the cust
 
 This is the minimum required configuration:
 
+```yaml
 dashboard:
   lambda:
     enabled: true
+```
 
 Default configuration
 It will be used, if you only include the minimum required configuration.
 The default configuration looks like this:
 
+```yaml
 dashboard:
   lambda:
     widgets:
-	-
-	 name: 'Sum of Invocations'
-	 metrics: 
-	   - 
-	    name: 'Invocations'
-	    stat: 'Sum'
-	-
-	 name: 'Sum of Errors',
-	 metrics: 
-	   -
-	    name: 'Erorrs'
-	    stat: 'Sum'
+      - name: 'Sum of Invocations'
+        metrics: 
+          - name: 'Invocations'
+            stat: 'Sum'
+      - name: 'Sum of Errors',
+        metrics: 
+          - name: 'Erorrs'
+            stat: 'Sum'
     enabled: true
+```
 
 With the default configuration the following widgets will be added to the cloudwatch dashboard:
 - one widget with the title 'Sum of Invocations' and one metric 'Invocations'. 
@@ -65,18 +65,18 @@ You can configure by your own:
 
 
 To gain maximum control over which functions to be included, you can disable lambda dashboards globally,
-
+```yaml
 dashboard:
   lambda:
     enabled: false
-
+```
 and enable it only for specific functions, by setting the dashboard flag for those functions to true:
-
+```yaml
 functions:
     myFunction:
       handler: some_handler
       dashboard: true
-
+```
 
 
 ## License
