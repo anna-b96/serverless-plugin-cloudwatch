@@ -19,13 +19,14 @@ class DashboardPlugin {
      * @param {!Object} options - Serverless options
      * */
     constructor(serverless, options) {
-        this.logger = msg => serverless.cli.log('[serverless-plugin-cloudwatch]: ' + msg)
+        this.logger = msg => serverless.cli.log('[serverless-plugin-cloudwatch]: ' + msg);
         // Serverless service: whole serverless.yml
-        this.service = serverless.service
+        this.service = serverless.service;
+        this.options = options;
         // for ex, eu-central-1
-        this.region = this.service.provider.region
+        this.region = this.service.provider.region;
 
-        this.stage = this.service.provider.stage
+        this.stage = this.getDeploymentStage();
 
         this.hooks = {
             /*
@@ -42,15 +43,15 @@ class DashboardPlugin {
      *  adds a dashboard resource to the cloudformation template, stored in the serverless object
      */
     addDashboard() {
-        const dashboard = this.createDashboard()
+        const dashboard = this.createDashboard();
 
         if (!ObjectUtil.isEmpty(dashboard)) {
-            const resourceName = 'ProjectOverviewDashboard'
-            var dashboardResource = {}
+            const resourceName = 'ProjectOverviewDashboard';
+            var dashboardResource = {};
             dashboardResource[resourceName] = dashboard;
-            const template = this.service.provider.compiledCloudFormationTemplate
-            template.Resources = Object.assign(dashboardResource, template.Resources)
-            this.service.provider.compiledCloudFormationTemplate = template
+            const template = this.service.provider.compiledCloudFormationTemplate;
+            template.Resources = Object.assign(dashboardResource, template.Resources);
+            this.service.provider.compiledCloudFormationTemplate = template;
         }
     }
 
@@ -60,25 +61,25 @@ class DashboardPlugin {
      */
     createDashboard() {
         // get dashboard config from serverless.yml
-        const dashboardConfig = this.getDashboardConfig()
-        const dynamoDBConfig = dashboardConfig.dynamoDB || {}
-        const lambdaConfig = dashboardConfig.lambda || {}
-        const s3Config = dashboardConfig.s3 || {}
-        const apiGatewayConfig = dashboardConfig.apiGateway || {}
+        const dashboardConfig = this.getDashboardConfig();
+        const dynamoDBConfig = dashboardConfig.dynamoDB || {};
+        const lambdaConfig = dashboardConfig.lambda || {};
+        const s3Config = dashboardConfig.s3 || {};
+        const apiGatewayConfig = dashboardConfig.apiGateway || {};
 
         // get Resources (S3 AND DynamoDB)
-        const serverlessResources = this.service.resources || {}
-        const cfResources = serverlessResources.Resources || {}
+        const serverlessResources = this.service.resources || {};
+        const cfResources = serverlessResources.Resources || {};
 
         // get Lamda functions
-        const functions = this.service.functions || {}
+        const functions = this.service.functions || {};
 
         // create new dashboard (only one for the current stage)
-        const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions)
-        const dashboardWidgets = widgetFactory.createWidgets()
+        const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions);
+        const dashboardWidgets = widgetFactory.createWidgets();
         if (ArrayUtil.notEmpty(dashboardWidgets)) {
-            const dashboardName = this.service.service + '-' + this.stage
-            const dashboard = new Dashboard(dashboardName, dashboardWidgets)
+            const dashboardName = this.service.service + '-' + this.stage;
+            const dashboard = new Dashboard(dashboardName, dashboardWidgets);
             return dashboard.create();
         }
         return {}
@@ -89,8 +90,17 @@ class DashboardPlugin {
      * @returns {Object} dashboard config
      */
     getDashboardConfig() {
-        const customConfig = this.service.custom || {}
-        return customConfig.dashboard || {}
+        const customConfig = this.service.custom || {};
+        return customConfig.dashboard || {};
+    }
+    /**
+     * Get the stage properly resolved
+     * See https://github.com/serverless/serverless/issues/2631
+     *
+     * @return {string} - Stage option
+     * */
+    getDeploymentStage() {
+        return this.options.stage || 'dev'
     }
 }
 
