@@ -2,22 +2,24 @@
 
 const WidgetFactory = require('./widgets/WidgetFactory')
 const Dashboard = require('./model/Dashboard')
+const ObjectUtil = require('./ObjectUtil')
+const ArrayUtil = require('./ArrayUtil')
 
 /**
- * @module serverless-plugin-cloudwatch-dashboard
+ * @module serverless-plugin-cloudwatch
  *
  * @see {@link https://serverless.com/framework/docs/providers/aws/guide/plugins/}
  * */
 class DashboardPlugin {
     /**
-     * @description Serverless CloudWatch Dashboards for Lambdas
+     * @description Serverless CloudWatch Dashboard for a better overview of your project's current state.
      * @constructor
      *
      * @param {!Object} serverless - Serverless object
      * @param {!Object} options - Serverless options
      * */
     constructor(serverless, options) {
-        this.logger = msg => serverless.cli.log('[serverless-plugin-cloudwatch-dashboard]: ' + msg)
+        this.logger = msg => serverless.cli.log('[serverless-plugin-cloudwatch]: ' + msg)
         // Serverless service: whole serverless.yml
         this.service = serverless.service
         // for ex, eu-central-1
@@ -32,24 +34,30 @@ class DashboardPlugin {
             Serverless can be extended either by adding new commands or by hooking external actions into lifecycle events of existing ones.
             better 'before:deploy:finalize' ??
             */
-            'before:package:finalize': () => {
-                console.log('Adding Dashboard')
-                this.addDashboard()
-            }
+            'before:package:finalize': () => this.addDashboard()
         }
     }
 
+    /**
+     *  adds a dashboard resource to the cloudformation template, stored in the serverless object
+     */
     addDashboard() {
         const dashboard = this.createDashboard()
 
-        const template = this.service.provider.compiledCloudFormationTemplate
-        template.Resources = Object.assign(dashboard, template.Resources)
-        this.service.provider.compiledCloudFormationTemplate = template
+        if (!ObjectUtil.isEmpty(dashboard)) {
+            const resourceName = 'ProjectOverviewDashboard'
+            var dashboardResource = {}
+            dashboardResource[resourceName] = dashboard;
+            const template = this.service.provider.compiledCloudFormationTemplate
+            template.Resources = Object.assign(dashboardResource, template.Resources)
+            this.service.provider.compiledCloudFormationTemplate = template
+        }
     }
 
-    /*
-    gets the config for each aws service, the resources for s3 and dynamoDB and all lambda functions
-    */
+    /**
+     *  gets the config for each aws service, the resources for s3 and dynamoDB and all lambda functions
+     *  @returns {Object} dashboard
+     */
     createDashboard() {
         // get dashboard config from serverless.yml
         const dashboardConfig = this.getDashboardConfig()
@@ -58,7 +66,8 @@ class DashboardPlugin {
         const s3Config = dashboardConfig.s3 || {}
         const apiGatewayConfig = dashboardConfig.apiGateway || {}
 
-        // get Resources (S3 AND DynamoDB
+        // get Resources (S3 AND DynamoDB)
+        const serverlessResources = this.service.resources || {}
         const cfResources = serverlessResources.Resources || {}
 
         // get Lamda functions
@@ -67,18 +76,22 @@ class DashboardPlugin {
         // create new dashboard (only one for the current stage)
         const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions)
         const dashboardWidgets = widgetFactory.createWidgets()
-        const dashboardName = this.service.service + '-' + this.stage
-        const dashboard = new Dashboard(dashboardName, dashboardWidgets)
-        return dashboard.create();
-
+        if (ArrayUtil.notEmpty(dashboardWidgets)) {
+            const dashboardName = this.service.service + '-' + this.stage
+            const dashboard = new Dashboard(dashboardName, dashboardWidgets)
+            return dashboard.create();
+        }
+        return {}
     }
 
+    /**
+     * gets the custom dashboard config from the serverless object
+     * @returns {Object} dashboard config
+     */
     getDashboardConfig() {
-        // serverless.yml dashboard config
         const customConfig = this.service.custom || {}
         return customConfig.dashboard || {}
     }
 }
-
 
 module.exports = DashboardPlugin

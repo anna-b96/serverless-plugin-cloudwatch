@@ -15,7 +15,9 @@ Add the plugin to the  `plugins`  array of your Serverless service in  `serverle
 
 ## Usage
 There will be only one dashboard per deployment stage. 
-The real objective is that the dashboard gives only an overview of the current state of your project.
+A dashboard is a customizable home page in the CloudWatch console that you can use to monitor your AWS resources in a *single view*. 
+That's why there will be only one dashboard per deployment.
+
 Following AWS Services are currently supported: 
 
 - AWS Lambda

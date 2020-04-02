@@ -2,7 +2,7 @@
   "name": "serverless-plugin-cloudwatch-widges",
   "version": "0.1.0",
   "description": "Generate CloudWatch Dashboard including widgets with configured metrics",
-  "main": "src/index.js",
+  "main": "src/DashboardPlugin.js",
   "scripts": {
     "test": "nyc --all ava"
   },

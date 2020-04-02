@@ -19,9 +19,11 @@ class WidgetFactory {
     createWidgets () {
         // lamda
         const lambdaConfig = this.getLambdaConfig()
+        this.logger(`dev log: create widgets for ${this.functions}, ${Object.values(this.functions)}`)
         const functionNames = this.getFunctionNames()
-
-        if (ArrayUtil.notEmpty(functionNames, lambdaConfig.widgets.metrics)) {
+        // there must at least one entry of widgets with a not empty metrics array
+        this.logger(`dev log: functionNames ${functionNames}`)
+        if (ArrayUtil.notEmpty(functionNames, lambdaConfig.widgets[0].metrics)) {
             return this.doCreateLambdaWidgets(functionNames, lambdaConfig)
         }
         else {
@@ -31,7 +33,7 @@ class WidgetFactory {
 
     doCreateLambdaWidgets(functionNames, config) {
         const widgetFactory = new LambdaWidgets(this.region, config, functionNames)
-        const allWidgets = widgetFactory.create()
+        return widgetFactory.create()
     }
 
     getLambdaConfig () {
@@ -47,21 +49,24 @@ class WidgetFactory {
                     ]
 
                 }],
-            enabled: false
+            enabled: true
             // set here default, if no config is provided in serverless
         };
         // return the first value if it’s truthy and the second value if the first value is falsy.
         // test later if this works if no config is provided!!
         if(ObjectUtil.isEmpty(this.lambdaConfig)) {
-            return defaultConfig;
+            return {enabled: false}
         }
-        return this.lambdaConfig;
+        if(ArrayUtil.notEmpty(this.lambdaConfig.widgets)){
+            return this.lambdaConfig;
+        }
+        return defaultConfig;
 
     }
 
     getFunctionNames () {
-        const allEnabled = this.getLambdaConfig().enabled // if false, only some specific functions should be included
-        const isEnabled = functionEnabled => (allEnabled && functionEnabled !== false) || functionEnabled;
+        const allEnabled = this.getConfig().enabled
+        const isEnabled = functionEnabled => (allEnabled && functionEnabled !== false) || functionEnabled
 
         return Object.values(this.functions)
             .filter(f => isEnabled(f.dashboard))
