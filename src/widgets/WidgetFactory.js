@@ -19,10 +19,8 @@ class WidgetFactory {
     createWidgets () {
         // lamda
         const lambdaConfig = this.getLambdaConfig()
-        this.logger(`dev log: create widgets for ${this.functions}, ${Object.values(this.functions)}`)
         const functionNames = this.getFunctionNames()
         // there must at least one entry of widgets with a not empty metrics array
-        this.logger(`dev log: functionNames ${functionNames}`)
         if (ArrayUtil.notEmpty(functionNames, lambdaConfig.widgets[0].metrics)) {
             return this.doCreateLambdaWidgets(functionNames, lambdaConfig)
         }
@@ -65,12 +63,15 @@ class WidgetFactory {
     }
 
     getFunctionNames () {
-        const allEnabled = this.getConfig().enabled
+        const allEnabled = this.getLambdaConfig().enabled
         const isEnabled = functionEnabled => (allEnabled && functionEnabled !== false) || functionEnabled
 
         return Object.values(this.functions)
             .filter(f => isEnabled(f.dashboard))
-            .map(f => f.name)
+            .map(f => {
+                this.logger(`Dev Log Functionnames: ${f} name ${f.name} object key 0 ${Object.keys(f)[0]} object key 1 ${Object.keys(f)[0]}` )
+                f.name
+            } )
     }
 
 
