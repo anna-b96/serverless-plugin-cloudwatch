@@ -68,10 +68,7 @@ class WidgetFactory {
 
         return Object.values(this.functions)
             .filter(f => isEnabled(f.dashboard))
-            .map(f => {
-                this.logger(`Dev Log Functionnames: ${f} name ${f.name} object key 0 ${Object.keys(f)[0]} object key 1 ${Object.keys(f)[0]}` )
-                f.name
-            } )
+            .map(f => f.name )
     }
 
 

@@ -10,7 +10,10 @@ class LambdaWidgets {
         this.functionNames = functionNames;
     }
 
-
+    /**
+     * creates an array of all lambda widgets.
+     * @returns {Array}
+     */
     create() {
         return this.config.widgets.reduce((acc, widget) => {
             const widgets = this.perFunction(widget.name, widget.metrics)
@@ -19,7 +22,12 @@ class LambdaWidgets {
         }, [])
     }
 
-
+    /**
+     * For every widget the metrics will be applied to every lambda function
+     * @param name
+     * @param metrics
+     * @returns {{width: number, type: string, properties: {stat: string, view: string, period: number, stacked: boolean, metrics: *, region: *, title: *}, height: number}}: one widget
+     */
     perFunction (name, metrics) {
         const widgetName = name;
 
@@ -31,9 +39,14 @@ class LambdaWidgets {
         return widget.create();
     }
 
-
+    /**
+     *
+     * @param name
+     * @param metrics
+     * @returns {Array}
+     */
     getMetrics(name, metrics) {
-        const functionMetrics = metrics.map(metric =>  ['AWS/Lambda', metric.name, 'FunctionName', name, {'stat': metric.stat }])
+        const functionMetrics = metrics.map(metric =>  ['AWS/Lambda', `${metric.name}`, 'FunctionName', `${name}`, {'stat': `${metric.stat}` }])
         return functionMetrics
 
     }
