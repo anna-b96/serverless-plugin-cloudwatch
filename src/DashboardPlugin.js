@@ -78,6 +78,7 @@ class DashboardPlugin {
         // create new dashboard (only one for the current stage)
         const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions);
         const dashboardWidgets = widgetFactory.createWidgets();
+        this.logger(`Dev Log: DashboardWidgets ${JSON.stringify(dashboardWidgets)}`)
         if (ArrayUtil.notEmpty(dashboardWidgets)) {
             const dashboardName = this.service.service + '-' + this.stage;
             const dashboard = new Dashboard(dashboardName, dashboardWidgets);

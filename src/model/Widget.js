@@ -49,9 +49,13 @@ class Widget {
   }
 
   create () {
-    if (this.metrics[0]) {
+    try {
       this.logger(`Dev Log: ${this.metrics[1][3]}`)
     }
+    catch(err) {
+      this.logger(`Dev Log: Error Widgets`)
+    }
+
     var height = 6;
     var width = 6;
 

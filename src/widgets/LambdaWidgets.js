@@ -16,11 +16,14 @@ class LambdaWidgets {
      * @returns {Array}
      */
     create() {
-        return this.config.widgets.reduce((acc, widget) => {
-            const widgets = this.perFunction(widget.name, widget.metrics)
-            acc.unshift(widgets)
+        const lambdaWidgets = this.config.widgets.reduce((acc, widget) => {
+            const widgets = this.perFunction(widget.name, widget.metrics);
+            acc.unshift(widgets);
+            this.logger(`Dev Log Reduce function ${JSON.stringify(widget)}  widgets ${widgets}`)
             return acc
-        }, [])
+        }, []);
+        this.logger(`Dev Log LambdaWidgets ${JSON.stringify(lambdaWidgets)}`)
+        return lambdaWidgets;
     }
 
     /**
@@ -37,6 +40,7 @@ class LambdaWidgets {
         var initial = [];
         var concat = (widgetMetrics) => {widgetMetrics.forEach(function (item) { initial = initial.concat(item)}); return initial}
         const widget = new Widget(this.logger, this.region, widgetName, concat(widgetMetrics))
+        this.logger(`Dev Log Metric per Function ${JSON.stringify(concat(widgetMetrics))}`)
         return widget.create();
     }
 

@@ -31,8 +31,11 @@ class WidgetFactory {
     }
 
     doCreateLambdaWidgets(functionNames, config) {
+        this.logger(`Dev Log LambdaConfig ${JSON.stringify(config)}`)
         const widgetFactory = new LambdaWidgets(this.logger, this.region, config, functionNames)
-        return widgetFactory.create()
+        const widgets = widgetFactory.create();
+        this.logger(`Dev Log Widgets ${JSON.stringify(widgets)}`)
+        return widgets;
     }
 
     /**

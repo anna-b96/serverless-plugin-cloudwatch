@@ -8,8 +8,11 @@ class Dashboard {
   }
 
   create () {
-    if (this.widgets[0]) {
+    try {
       this.logger(`Dev Log: ${this.widgets[0].properties.metrics[0][3]}`)
+    }
+    catch(err) {
+      this.logger(`Dev Log: Error Dashboard`)
     }
     return {
       // https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudwatch-dashboard.html
