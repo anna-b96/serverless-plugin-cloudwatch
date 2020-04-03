@@ -81,8 +81,10 @@ class DashboardPlugin {
         this.logger(`Dev Log: DashboardWidgets ${JSON.stringify(dashboardWidgets)}`)
         if (ArrayUtil.notEmpty(dashboardWidgets)) {
             const dashboardName = this.service.service + '-' + this.stage;
-            const dashboard = new Dashboard(dashboardName, dashboardWidgets);
-            return dashboard.create();
+            const dashboardFactory = new Dashboard(this.logger, dashboardName, dashboardWidgets);
+            const dashboard = dashboardFactory.create();
+            this.logger(`Dev Log: Dashboard ${JSON.stringify(dashboard)}`)
+            return dashboard;
         }
         return {}
     }
