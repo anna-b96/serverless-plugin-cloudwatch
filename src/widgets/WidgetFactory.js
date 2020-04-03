@@ -22,7 +22,7 @@ class WidgetFactory {
         const functionNames = this.getFunctionNames()
         // there must at least one entry of widgets with a not empty metrics array
         if (ArrayUtil.notEmpty(functionNames)) {
-            this.logger(`Dev Log Functionnames ${functionNames[0]} ${functionNames[19]} `)
+            this.logger(`Dev Log Functionnames ${functionNames[0]} ${functionNames[9]} `)
             return this.doCreateLambdaWidgets(functionNames, lambdaConfig)
         }
         else {

@@ -45,11 +45,13 @@ class DashboardPlugin {
     addDashboard() {
         const dashboard = this.createDashboard();
         if (!ObjectUtil.isEmpty(dashboard)) {
+            this.logger(`Dev Log: dashboard ${JSON.stringify(dashboard)}`)
             const resourceName = 'ProjectOverviewDashboard';
-            var dashboardResource = {};
+            let dashboardResource = {};
             dashboardResource[resourceName] = dashboard;
             const template = this.service.provider.compiledCloudFormationTemplate;
             template.Resources = Object.assign(dashboardResource, template.Resources);
+            this.logger(`Dev Log: template ${JSON.stringify(template.Resources)}`)
             this.service.provider.compiledCloudFormationTemplate = template;
         }
     }

@@ -16,7 +16,6 @@ class LambdaWidgets {
      * @returns {Array}
      */
     create() {
-        this.logger(`Dev Log: Widgets name ${this.config.widgets[0].name}`)
         return this.config.widgets.reduce((acc, widget) => {
             const widgets = this.perFunction(widget.name, widget.metrics)
             acc.unshift(widgets)
