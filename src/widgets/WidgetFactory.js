@@ -21,7 +21,8 @@ class WidgetFactory {
         const lambdaConfig = this.getLambdaConfig()
         const functionNames = this.getFunctionNames()
         // there must at least one entry of widgets with a not empty metrics array
-        if (ArrayUtil.notEmpty(functionNames, lambdaConfig.widgets[0].metrics)) {
+        if (ArrayUtil.notEmpty(functionNames)) {
+            this.logger(`Dev Log Functionnames ${functionNames[0]} ${functionNames[19]} `)
             return this.doCreateLambdaWidgets(functionNames, lambdaConfig)
         }
         else {
@@ -30,17 +31,20 @@ class WidgetFactory {
     }
 
     doCreateLambdaWidgets(functionNames, config) {
-        const widgetFactory = new LambdaWidgets(this.region, config, functionNames)
+        const widgetFactory = new LambdaWidgets(this.logger, this.region, config, functionNames)
         return widgetFactory.create()
     }
 
+    /**
+     * @returns {Object} returns either a default configuration (if lambda dashboard is enabled, but no custom configuration provided) OR a configuration with disabled flag OR the provided custom configuration
+     */
     getLambdaConfig () {
         const defaultConfig = {
             widgets: [
                 { name: 'Sum of Invocations',
-                    metrics: [
-                        { name: 'Invocations', stat: 'Sum' },
-                    ]},
+                  metrics: [
+                      { name: 'Invocations', stat: 'Sum' },
+                  ]},
                 { name: 'Sum of Errors',
                     metrics: [
                         { name: 'Errors', stat: 'Sum'}
@@ -63,9 +67,8 @@ class WidgetFactory {
     }
 
     getFunctionNames () {
-        const allEnabled = this.getLambdaConfig().enabled
-        const isEnabled = functionEnabled => (allEnabled && functionEnabled !== false) || functionEnabled
-
+        const allEnabled = this.getLambdaConfig().enabled;
+        const isEnabled = functionEnabled => (allEnabled && functionEnabled !== false) || functionEnabled;
         return Object.values(this.functions)
             .filter(f => isEnabled(f.dashboard))
             .map(f => f.name )

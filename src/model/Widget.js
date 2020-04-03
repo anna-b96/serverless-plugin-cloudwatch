@@ -40,7 +40,8 @@ class Widget {
    properties field:
    markdown:  string, text to be displayed. https://docs.aws.amazon.com/awsconsolehelpdocs/latest/gsg/aws-markdown.html
    */
-  constructor (region, name, metrics, view = 'timeSeries') {
+  constructor (logger, region, name, metrics, view = 'timeSeries') {
+    this.logger = logger;
     this.region = region
     this.name = name
     this.metrics = metrics
@@ -48,6 +49,9 @@ class Widget {
   }
 
   create () {
+    if (this.metrics[0]) {
+      this.logger(`Dev Log: ${this.metrics[1][3]}`)
+    }
     var height = 6;
     var width = 6;
 

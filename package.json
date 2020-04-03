@@ -1,6 +1,6 @@
 {
   "name": "serverless-plugin-cloudwatch",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Generate CloudWatch Dashboard including widgets with configured metrics",
   "main": "src/DashboardPlugin.js",
   "scripts": {

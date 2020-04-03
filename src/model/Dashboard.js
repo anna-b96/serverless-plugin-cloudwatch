@@ -1,12 +1,16 @@
 'use strict'
 
 class Dashboard {
-  constructor (name, widgets) {
+  constructor (logger, name, widgets) {
+    this.logger = logger;
     this.name = name
     this.widgets = widgets
   }
 
   create () {
+    if (this.widgets[0]) {
+      this.logger(`Dev Log: ${this.widgets[0].properties.metrics[0][3]}`)
+    }
     return {
       // https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudwatch-dashboard.html
       // AWS::CloudWatch::Dashboard resource specifies an Amazon CloudWatch dashboard. All dashboards are global

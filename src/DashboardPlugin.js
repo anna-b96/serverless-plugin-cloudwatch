@@ -44,11 +44,7 @@ class DashboardPlugin {
      */
     addDashboard() {
         const dashboard = this.createDashboard();
-
         if (!ObjectUtil.isEmpty(dashboard)) {
-            dashboard.Properties.DashboardBody.widgets[0].properties[0][3]
-            this.logger(`Dev Log: dashboard.Properties.DashboardBody.widgets[0].properties[0][3] value: ${dashboard.Properties.DashboardBody.widgets[0].properties[0][3]} 
-            type: ${typeof dashboard.Properties.DashboardBody.widgets[0].properties[0][3]}`)
             const resourceName = 'ProjectOverviewDashboard';
             var dashboardResource = {};
             dashboardResource[resourceName] = dashboard;

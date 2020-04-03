@@ -4,7 +4,8 @@ const Widget = require('../model/Widget')
 
 class LambdaWidgets {
 
-    constructor(region, config, functionNames) {
+    constructor(logger, region, config, functionNames) {
+        this.logger = logger;
         this.region = region;
         this.config = config; //all widgets includig name, metrics and stats
         this.functionNames = functionNames;
@@ -15,6 +16,7 @@ class LambdaWidgets {
      * @returns {Array}
      */
     create() {
+        this.logger(`Dev Log: Widgets name ${this.config.widgets[0].name}`)
         return this.config.widgets.reduce((acc, widget) => {
             const widgets = this.perFunction(widget.name, widget.metrics)
             acc.unshift(widgets)
@@ -35,7 +37,7 @@ class LambdaWidgets {
             .map(functionName => this.getMetrics(functionName, metrics ))
         var initial = [];
         var concat = (widgetMetrics) => {widgetMetrics.forEach(function (item) { initial = initial.concat(item)}); return initial}
-        const widget = new Widget(this.region, widgetName, concat(widgetMetrics))
+        const widget = new Widget(this.logger, this.region, widgetName, concat(widgetMetrics))
         return widget.create();
     }
 
