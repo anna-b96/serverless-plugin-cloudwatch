@@ -1,7 +1,7 @@
 # serverless-plugin-cloudwatch
 Serverless plugin for setting up AWS CloudWatch dashboards with widgets (only from type 'metric') for configured metrics.
 
-v0.1.0: it's still in development, not ready to use right now :) 
+v0.1.8: it's still in development, not ready to use right now :) 
 
 ## Installation
 Install via npm in the root of your Serverless service:
@@ -21,8 +21,9 @@ That's why there will be only one dashboard per deployment.
 Following AWS Services are currently supported: 
 
 - AWS Lambda
+- AWS DynamoDB
 
-(AWS S3, AWS ApiGateway and AWS DynamoDB follows soon) 
+(AWS S3 and AWS ApiGateway follows soon) 
 
 ### Configuration of the dashboard
 The plugin can be configured by adding a property called `dashboard` to the custom properties of the Serverless service.
@@ -59,7 +60,7 @@ With the default configuration the following widgets will be added to the cloudw
 - one widget with the title 'Sum of Errors' and one metric 'Errors'
 The metrics in a widget will be shown for each of your lambda functions (if lambda dashboards are enabled globally).
 
-You can configure by your own:
+##### You can configure by your own:
 - the number of widgets by adding a widget to the array
 - the title (`name`) of the widget
 - which metrics (`name`) should be included in each widget
@@ -111,6 +112,19 @@ dashboard:
             dimension: 'TableName'
     enabled: true
 ```
+With the default configuration the following widgets will be added to the cloudwatch dashboard:
+- one widget with the title 'System- and UserErrors' and two metrics 'SystemErrors' and 'UserErrors'. 
+- one widget with the title 'Successful requests' and one metric 'SuccessfulRequestLatency'
+
+The metrics in those widget will be shown for each of your dynamoDB tables.
+
+##### You can configure by your own:
+- the number of widgets by adding a widget to the array
+- the title (`name`) of the widget
+- which metrics (`name`) should be included in each widget
+- which statistic (`stat`) should be used for each metric
+- which dimension (`dimension`) should be used for each metric (`GlobalSecondaryIndexName` | `Operation` | `ReceivingRegion` | `StreamLabel` | `TableName`).
+ See [AWS DynamoDB Metrics and Dimensions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/metrics-dimensions.html)
 
 ## License
 

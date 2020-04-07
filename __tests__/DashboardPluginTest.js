@@ -260,27 +260,29 @@ test('create dashboard with dynamodb widgets and lambda widgets', t => {
                 }
             },
             resources: {
-                TableResource1: {
-                    Type: "AWS::DynamoDB::Table",
-                    Properties: {
-                        TableName: 'TestTable-1'
-                    }
-                },
-                NonTableResource: {
-                    Type: "AWS::Lambda::Permission"
-                },
-                TableResource2: {
-                    Type: "AWS::DynamoDB::Table",
-                    Properties: {
-                        TableName: 'TestTable-2',
-                        GlobalSecondaryIndexes: [
-                            {
-                                IndexName: 'Index-1'
-                            },
-                            {
-                                IndexName: 'Index-2'
-                            }
-                        ]
+                Resources: {
+                    TableResource1: {
+                        Type: "AWS::DynamoDB::Table",
+                        Properties: {
+                            TableName: 'TestTable-1'
+                        }
+                    },
+                    NonTableResource: {
+                        Type: "AWS::Lambda::Permission"
+                    },
+                    TableResource2: {
+                        Type: "AWS::DynamoDB::Table",
+                        Properties: {
+                            TableName: 'TestTable-2',
+                            GlobalSecondaryIndexes: [
+                                {
+                                    IndexName: 'Index-1'
+                                },
+                                {
+                                    IndexName: 'Index-2'
+                                }
+                            ]
+                        }
                     }
                 }
             }
@@ -290,10 +292,8 @@ test('create dashboard with dynamodb widgets and lambda widgets', t => {
     const dashboardPlugin = new DashboardPlugin(serverless, {})
     const dashboard = dashboardPlugin.createDashboard()
     t.is(dashboard.Type, 'AWS::CloudWatch::Dashboard')
-    //t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets.length, 4)
+    t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets.length, 3)
     t.deepEqual(dashboard.Properties.DashboardName, 'project-name-dev')
-    t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets, '')
-    //t.deepEqual(dashboard, '')
 })
 test('create dashboard with dynamodb widgets', t => {
     const serverless = {
@@ -306,14 +306,6 @@ test('create dashboard with dynamodb widgets', t => {
             custom: {
                 dashboard: {
                     dynamoDB: {
-                        widgets: [
-                            {
-                                name: 'Returned items',
-                                metrics: [
-                                    {name: 'ReturnedItemCount', stat: 'Average', dimension: 'TableName'}
-                                ]
-                            }
-                        ],
                         enabled: true
                     }
                 }
@@ -328,27 +320,29 @@ test('create dashboard with dynamodb widgets', t => {
                 }
             },
             resources: {
-                TableResource1: {
-                    Type: "AWS::DynamoDB::Table",
-                    Properties: {
-                        TableName: 'TestTable-1'
-                    }
-                },
-                NonTableResource: {
-                    Type: "AWS::Lambda::Permission"
-                },
-                TableResource2: {
-                    Type: "AWS::DynamoDB::Table",
-                    Properties: {
-                        TableName: 'TestTable-2',
-                        GlobalSecondaryIndexes: [
-                            {
-                                IndexName: 'Index-1'
-                            },
-                            {
-                                IndexName: 'Index-2'
-                            }
-                        ]
+                Resources: {
+                    TableResource1: {
+                        Type: "AWS::DynamoDB::Table",
+                        Properties: {
+                            TableName: 'TestTable-1'
+                        }
+                    },
+                    NonTableResource: {
+                        Type: "AWS::Lambda::Permission"
+                    },
+                    TableResource2: {
+                        Type: "AWS::DynamoDB::Table",
+                        Properties: {
+                            TableName: 'TestTable-2',
+                            GlobalSecondaryIndexes: [
+                                {
+                                    IndexName: 'Index-1'
+                                },
+                                {
+                                    IndexName: 'Index-2'
+                                }
+                            ]
+                        }
                     }
                 }
             }
@@ -357,11 +351,7 @@ test('create dashboard with dynamodb widgets', t => {
 
     const dashboardPlugin = new DashboardPlugin(serverless, {})
     const dashboard = dashboardPlugin.createDashboard()
-    t.is(dashboard.Type, 'AWS::CloudWatch::Dashboard')
-    t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets.length, 2)
-    t.deepEqual(dashboard.Properties.DashboardName, 'project-name-dev')
-    t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets, '')
-    //t.deepEqual(dashboard, '')
+    t.is(JSON.parse(dashboard.Properties.DashboardBody).widgets.length, 2)
 
 })
 // ---------------------------------- tests for getDashboardConfig() ---------------------------------- //
