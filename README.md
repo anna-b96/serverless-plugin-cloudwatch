@@ -95,7 +95,7 @@ The default configuration looks like this:
 
 ```yaml
 dashboard:
-  lambda:
+  dynamoDB:
     widgets:
       - name: 'System- and UserErrors'
         metrics: 
