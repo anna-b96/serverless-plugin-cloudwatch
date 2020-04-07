@@ -4,7 +4,7 @@ const sinon = require('sinon')
 const test = require('ava')
 
 const Dashboard = require('../../src/model/Dashboard')
-
+const logger = msg => {};
 const widgets = [{
     type: 'metric',
     width: 24,
@@ -38,7 +38,7 @@ const widgets = [{
 ]
 
 test('create dashboard', t => {
-    const dashboardFactory = new Dashboard('test-dashboard', widgets)
+    const dashboardFactory = new Dashboard(logger,'test-dashboard', widgets)
     const dashboard = dashboardFactory.create()
 
     t.is(dashboard.Type, 'AWS::CloudWatch::Dashboard')

@@ -3,18 +3,22 @@
 const sinon = require('sinon');
 const test = require('ava');
 const WidgetFactory = require('../../src/widgets/WidgetFactory');
-const ArrayUtil = require('../../src/ArrayUtil')
-
 
 const logger = msg => {};
 const region = 'eu-central-1';
-const dynamoDBConfig = {};
+let dynamoDBConfig = {};
 const s3Config = {};
 const apiGatewayConfig = {};
-const cfResources = [];
+let cfResources = [];
 const functions = {
-    'function1': {dashboard: true},
-    'function2': {dashboard: true}
+        f1: {
+            name: 'function1',
+            dashboard: 'true'
+        },
+        f2: {
+            name: 'function2',
+            dashboard: 'true'
+        }
 };
 const lambdaConfig = {
     widgets: [
@@ -30,6 +34,7 @@ const lambdaConfig = {
 
     enabled: false
 }
+
 const lambdaWidgets = [{
     type: 'metric',
     width: 24,
@@ -61,6 +66,7 @@ const lambdaWidgets = [{
         }
     }
 ]
+// ---------------------------------- tests for getFunctionNames() ---------------------------------- //
 test('getFunctionNames() ', t => {
     const widgetFactory = new WidgetFactory(logger, region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions);
     const result = widgetFactory.getFunctionNames();
@@ -73,6 +79,50 @@ test('with globally disabled dashboard and two functions where dashboard is enab
     sinon.stub(widgetFactory, 'getFunctionNames').returns(['function1', 'function2'])
     const result = widgetFactory.createWidgets()
     t.deepEqual(result, lambdaWidgets)
+})
+test('with globally disabled dashboard and two functions where dashboard is enabled and minimum dynamoDB config', t => {
+    dynamoDBConfig = {
+        enabled: true
+    };
+    cfResources = {
+        TableResource1: {
+            Type: "AWS::DynamoDB::Table",
+            Properties: {
+                TableName: 'TestTable-1'
+            }
+        },
+        NonTableResource: {
+            Type: "AWS::Lambda::Permission"
+        },
+        TableResource2: {
+            Type: "AWS::DynamoDB::Table",
+            Properties: {
+                TableName: 'TestTable-2',
+                GlobalSecondaryIndexes: [
+                    {
+                        IndexName: 'Index-1'
+                    },
+                    {
+                        IndexName: 'Index-2'
+                    }
+                ]
+            }
+        }
+    }
+
+    const widgetFactory = new WidgetFactory(logger, region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions)
+    sinon.stub(widgetFactory, 'getLambdaConfig').returns(lambdaConfig)
+    sinon.stub(widgetFactory, 'getFunctionNames').returns(['function1', 'function2'])
+    const result = widgetFactory.createWidgets()
+    t.deepEqual(result.length, 4)
+    t.deepEqual(result[0].properties.title, 'Sum of Errors' )
+    t.is(result[0].properties.metrics.length, 2 )
+    t.deepEqual(result[1].properties.title, 'Sum of Invocations' )
+    t.is(result[1].properties.metrics.length, 2 )
+    t.deepEqual(result[2].properties.title, 'System- and UserErrors' )
+    t.is(result[2].properties.metrics.length, 4 )
+    t.deepEqual(result[3].properties.title, 'Successful requests' )
+    t.is(result[3].properties.metrics.length, 2 )
 })
 
 // ---------------------------------- tests for doCreateLambdaWidgets() ---------------------------------- //

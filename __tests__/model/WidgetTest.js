@@ -5,13 +5,14 @@ const test = require('ava')
 
 const Widget = require('../../src/model/Widget')
 
+const logger = msg => {};
 const metrics = [
     ["AWS/Lambda", "Duration", "FunctionName", "test-function-1", {"stat": "Average"}],
     ["AWS/Lambda", "Duration", "FunctionName", "test-function-2", {"stat": "Maximum"}]
 ]
 
 test('create widget', t => {
-    const widgetFactory = new Widget('eu-central-1', 'test-widget', metrics)
+    const widgetFactory = new Widget(logger,'eu-central-1', 'test-widget', metrics)
     const widget = widgetFactory.create()
 
     t.is(widget.type, 'metric')

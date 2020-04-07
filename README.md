@@ -26,7 +26,7 @@ Following AWS Services are currently supported:
 
 ### Configuration of the dashboard
 The plugin can be configured by adding a property called `dashboard` to the custom properties of the Serverless service.
-
+#### Lambda
 This is the minimum required configuration:
 
 ```yaml
@@ -79,7 +79,38 @@ functions:
       handler: some_handler
       dashboard: true
 ```
+#### DynamoDB 
+This is the minimum required configuration:
 
+```yaml
+dashboard:
+  dynamoDB:
+    enabled: true
+```
+
+Default configuration
+It will be used, if you only include the minimum required configuration.
+The default configuration looks like this:
+
+```yaml
+dashboard:
+  lambda:
+    widgets:
+      - name: 'System- and UserErrors'
+        metrics: 
+          - name: 'SystemErrors'
+            stat: 'Sum'
+            dimension: 'TableName'
+          - name: 'UserErrors'
+            stat: 'Sum'
+            dimension: 'TableName'
+      - name: 'Successful requests',
+        metrics: 
+          - name: 'SuccessfulRequestLatency'
+            stat: 'Average'
+            dimension: 'TableName'
+    enabled: true
+```
 
 ## License
 

@@ -4,6 +4,7 @@ const sinon = require('sinon')
 const test = require('ava')
 const LambdaWidgets = require('../../src/widgets/LambdaWidgets')
 
+const logger = msg => {};
 const region = 'eu-central-1';
 const lambdaConfig = {
     widgets: [
@@ -56,14 +57,14 @@ test('create(): creating two lambda widgets', t => {
             }
         }
     ]
-    const widgetFactory = new LambdaWidgets(region, lambdaConfig, ['function1', 'function2']);
+    const widgetFactory = new LambdaWidgets(logger, region, lambdaConfig, ['function1', 'function2']);
     const result = widgetFactory.create();
     t.deepEqual(result, expected )
 
 })
 
 test('test perFunction() with one function and one metric ', t => {
-    const lambdaWidgets = new LambdaWidgets(region, lambdaConfig, ['function1']);
+    const lambdaWidgets = new LambdaWidgets(logger, region, lambdaConfig, ['function1']);
     const result = lambdaWidgets.perFunction(lambdaConfig.widgets[0].name, lambdaConfig.widgets[0].metrics )
 
     const expected = {
@@ -85,7 +86,7 @@ test('test perFunction() with one function and one metric ', t => {
     t.deepEqual(result, expected)
 })
 test('test perFunction() with two functions and two metrics', t => {
-    const lambdaWidgets = new LambdaWidgets(region, lambdaConfig, ['function1', 'function2']);
+    const lambdaWidgets = new LambdaWidgets(logger, region, lambdaConfig, ['function1', 'function2']);
     const result = lambdaWidgets.perFunction(lambdaConfig.widgets[0].name, lambdaConfig.widgets[0].metrics )
 
     const expected = {

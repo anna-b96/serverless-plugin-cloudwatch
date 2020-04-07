@@ -2,8 +2,8 @@
 
 const WidgetFactory = require('./widgets/WidgetFactory')
 const Dashboard = require('./model/Dashboard')
-const ObjectUtil = require('./ObjectUtil')
-const ArrayUtil = require('./ArrayUtil')
+const ObjectUtil = require('./utils/ObjectUtil')
+const ArrayUtil = require('./utils/ArrayUtil')
 
 /**
  * @module serverless-plugin-cloudwatch
@@ -45,7 +45,6 @@ class DashboardPlugin {
     addDashboard() {
         const dashboard = this.createDashboard();
         if (!ObjectUtil.isEmpty(dashboard)) {
-            this.logger(`Dev Log: dashboard ${JSON.stringify(dashboard)}`)
             const resourceName = 'ProjectOverviewDashboard';
             let dashboardResource = {};
             dashboardResource[resourceName] = dashboard;
@@ -53,6 +52,8 @@ class DashboardPlugin {
             template.Resources = Object.assign(dashboardResource, template.Resources);
             this.logger(`Dev Log: template ${JSON.stringify(template.Resources)}`)
             this.service.provider.compiledCloudFormationTemplate = template;
+        } else {
+            this.logger('No dashboard has been added.')
         }
     }
 
@@ -78,7 +79,7 @@ class DashboardPlugin {
         // create new dashboard (only one for the current stage)
         const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions);
         const dashboardWidgets = widgetFactory.createWidgets();
-        this.logger(`Dev Log: DashboardWidgets ${JSON.stringify(dashboardWidgets)}`)
+        this.logger(`Adding ${dashboardWidgets.length} widgets to the dashboard...`)
         if (ArrayUtil.notEmpty(dashboardWidgets)) {
             const dashboardName = this.service.service + '-' + this.stage;
             const dashboardFactory = new Dashboard(this.logger, dashboardName, dashboardWidgets);
