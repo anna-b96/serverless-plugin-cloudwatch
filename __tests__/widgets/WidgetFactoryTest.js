@@ -41,13 +41,13 @@ const lambdaWidgets = [{
     height: 6,
     properties: {
         region: 'eu-central-1',
-        title: 'Sum of Errors',
+        title: 'Lambda: Sum of Errors',
         metrics: [['AWS/Lambda', 'Errors', 'FunctionName', 'function1', { 'stat': 'Sum' }],
             ['AWS/Lambda', 'Errors', 'FunctionName', 'function2', { 'stat': 'Sum' }]],
         stat: 'Sum',
         view: 'timeSeries',
         stacked: false,
-        period: 60
+        period: 300
     }
 },
     {
@@ -56,13 +56,13 @@ const lambdaWidgets = [{
         height: 6,
         properties: {
             region: 'eu-central-1',
-            title: 'Sum of Invocations',
+            title: 'Lambda: Sum of Invocations',
             metrics: [['AWS/Lambda', 'Invocations', 'FunctionName', 'function1', { 'stat': 'Sum' }],
                 ['AWS/Lambda', 'Invocations', 'FunctionName', 'function2', { 'stat': 'Sum' }]],
             stat: 'Sum',
             view: 'timeSeries',
             stacked: false,
-            period: 60
+            period: 300
         }
     }
 ]
@@ -114,14 +114,14 @@ test('with globally disabled dashboard and two functions where dashboard is enab
     sinon.stub(widgetFactory, 'getLambdaConfig').returns(lambdaConfig)
     sinon.stub(widgetFactory, 'getFunctionNames').returns(['function1', 'function2'])
     const result = widgetFactory.createWidgets()
-    t.deepEqual(result.length, 4)
-    t.deepEqual(result[0].properties.title, 'Sum of Errors' )
+    //t.deepEqual(result.length, 4)
+    t.deepEqual(result[0].properties.title, 'Lambda: Sum of Errors' )
     t.is(result[0].properties.metrics.length, 2 )
-    t.deepEqual(result[1].properties.title, 'Sum of Invocations' )
+    t.deepEqual(result[1].properties.title, 'Lambda: Sum of Invocations' )
     t.is(result[1].properties.metrics.length, 2 )
-    t.deepEqual(result[2].properties.title, 'System- and UserErrors' )
+    t.deepEqual(result[2].properties.title, 'DynamoDB: sum of system- and user errors' )
     t.is(result[2].properties.metrics.length, 4 )
-    t.deepEqual(result[3].properties.title, 'Successful requests' )
+    t.deepEqual(result[3].properties.title, 'DynamoDB: average time of successful requests' )
     t.is(result[3].properties.metrics.length, 2 )
 })
 
@@ -146,11 +146,11 @@ test('with minimum lambda configuration', t => {
     };
     const expectedLambdaConfig = {
         widgets: [
-            { name: 'Sum of Invocations',
+            { name: 'sum of function invocations',
                 metrics: [
                     { name: 'Invocations', stat: 'Sum' },
                 ]},
-            { name: 'Sum of Errors',
+            { name: 'number of invocations that result in a function error',
                 metrics: [
                     { name: 'Errors', stat: 'Sum'}
                 ]

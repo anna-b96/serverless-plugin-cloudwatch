@@ -1,7 +1,7 @@
 # serverless-plugin-cloudwatch
 Serverless plugin for setting up AWS CloudWatch dashboards with widgets (only from type 'metric') for configured metrics.
 
-v0.1.8: it's still in development, not ready to use right now :) 
+v0.1.10: it's still in development, not ready to use right now :) 
 
 ## Installation
 Install via npm in the root of your Serverless service:
@@ -44,11 +44,11 @@ The default configuration looks like this:
 dashboard:
   lambda:
     widgets:
-      - name: 'Sum of Invocations'
+      - name: 'sum of function invocations'
         metrics: 
           - name: 'Invocations'
             stat: 'Sum'
-      - name: 'Sum of Errors',
+      - name: 'number of invocations that result in a function error',
         metrics: 
           - name: 'Erorrs'
             stat: 'Sum'
@@ -97,7 +97,7 @@ The default configuration looks like this:
 dashboard:
   dynamoDB:
     widgets:
-      - name: 'System- and UserErrors'
+      - name: 'sum of system- and user errors'
         metrics: 
           - name: 'SystemErrors'
             stat: 'Sum'
@@ -105,7 +105,7 @@ dashboard:
           - name: 'UserErrors'
             stat: 'Sum'
             dimension: 'TableName'
-      - name: 'Successful requests',
+      - name: 'average time of successful requests',
         metrics: 
           - name: 'SuccessfulRequestLatency'
             stat: 'Average'
@@ -126,6 +126,67 @@ The metrics in those widget will be shown for each of your dynamoDB tables.
 - which dimension (`dimension`) should be used for each metric (`GlobalSecondaryIndexName` | `Operation` | `ReceivingRegion` | `StreamLabel` | `TableName`).
  See [AWS DynamoDB Metrics and Dimensions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/metrics-dimensions.html)
 
+#### S3 
+This is the minimum required configuration:
+
+```yaml
+dashboard:
+  s3:
+    enabled: true
+```
+
+Default configuration
+It will be used, if you only include the minimum required configuration.
+The default configuration looks like this:
+
+```yaml
+dashboard:
+  s3:
+    widgets:
+      - name: 'daily storage metrics for buckets'
+        metrics: 
+          - name: 'BucketSizeBytes'
+            stat: 'Average'
+            dimension: 'BucketName'
+          - name: 'UserErrors'
+            stat: 'Average'
+            dimension: 'BucketName'
+      - name: 'total request latency',
+        metrics: 
+          - name: 'TotalRequestLatency'
+            stat: 'Average'
+            dimension: 'BucketName'
+    enabled: true
+```
+#### ApiGateway 
+This is the minimum required configuration:
+
+```yaml
+dashboard:
+  apiGateway:
+    enabled: true
+```
+
+Default configuration
+It will be used, if you only include the minimum required configuration.
+The default configuration looks like this:
+
+```yaml
+dashboard:
+  apiGateway:
+    widgets:
+      - name: 'system- and user errors'
+        metrics: 
+          - name: '5xxErrors'
+            stat: 'Sum'
+          - name: '4xxErrors'
+            stat: 'Sum'
+      - name: 'total number of API requests',
+        metrics: 
+          - name: 'Count'
+            stat: 'SampleCount'
+    enabled: true
+```
 ## License
 
 This software is released under the MIT license. See  [the license file](https://github.com/anna-b96/serverless-plugin-cloudwatch/blob/master/LICENSE)  for more details.

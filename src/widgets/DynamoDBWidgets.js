@@ -15,7 +15,8 @@ class DynamoDBWidgets {
     create() {
         return this.config.widgets.reduce((acc, widget) => {
             const widgetMetrics = this.getMetrics(widget.metrics);
-            const widgetFactory = new Widget(this.logger, this.region, widget.name, widgetMetrics);
+            const widgetName = 'DynamoDB: ' + widget.name;
+            const widgetFactory = new Widget(this.logger, this.region, widgetName, widgetMetrics);
             acc.push(widgetFactory.create());
             return acc;
         }, [])

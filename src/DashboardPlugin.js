@@ -24,9 +24,8 @@ class DashboardPlugin {
         this.service = serverless.service;
         this.options = options;
         // for ex, eu-central-1
-        this.region = this.service.provider.region;
-
-        this.stage = this.getDeploymentStage();
+        this.provider = this.service.provider;
+        this.region = this.provider.region;
 
         this.hooks = {
             /*
@@ -48,10 +47,10 @@ class DashboardPlugin {
             const resourceName = 'ProjectOverviewDashboard';
             let dashboardResource = {};
             dashboardResource[resourceName] = dashboard;
-            const template = this.service.provider.compiledCloudFormationTemplate;
+            const template = this.provider.compiledCloudFormationTemplate;
             template.Resources = Object.assign(dashboardResource, template.Resources);
             this.logger(`Dev Log: template ${JSON.stringify(template.Resources)}`)
-            this.service.provider.compiledCloudFormationTemplate = template;
+            this.provider.compiledCloudFormationTemplate = template;
         } else {
             this.logger('No dashboard has been added.')
         }
@@ -76,12 +75,19 @@ class DashboardPlugin {
         // get Lamda functions
         const functions = this.service.functions || {};
 
+        // get apiGateway name
+        this.apiGatewayName = this.getApiGatewayName();
+
+        // get deployment stage
+        this.stage = this.getDeploymentStage();
+
         // create new dashboard (only one for the current stage)
-        const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions);
+        this.logger(`Creating dashboard for deployment stage ${this.stage} and `)
+        const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions, this.apiGatewayName);
         const dashboardWidgets = widgetFactory.createWidgets();
         this.logger(`Adding ${dashboardWidgets.length} widgets to the dashboard...`)
         if (ArrayUtil.notEmpty(dashboardWidgets)) {
-            const dashboardName = this.service.service + '-' + this.stage;
+            const dashboardName = this.stage + '-' + this.service.service;
             const dashboardFactory = new Dashboard(this.logger, dashboardName, dashboardWidgets);
             const dashboard = dashboardFactory.create();
             this.logger(`Dev Log: Dashboard ${JSON.stringify(dashboard)}`)
@@ -99,14 +105,42 @@ class DashboardPlugin {
         return customConfig.dashboard || {};
     }
     /**
-     * Get the stage properly resolved
+     * Get the stage properly resolved. Only when deployment command is done with option --stage
      * See https://github.com/serverless/serverless/issues/2631
      *
      * @return {string} - Stage option
      * */
     getDeploymentStage() {
-        return this.options.stage || 'dev'
+        let apiGatewayDeploymentResource = undefined;
+        if (!this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources) && !this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`])) {
+            apiGatewayDeploymentResource = this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`].Properties.Name
+        }
+        return this.options.stage || apiGatewayDeploymentResource ||'deployment'
     }
+
+    /**
+     * Gets api gateway name either from provider config or from compiledCloudFormationTemplate
+     * @returns {string | undefined} - Api Gateway name
+     */
+    getApiGatewayName() {
+        if ((!this.isNullOrUndefined(this.provider.apiGateway)) &&
+            !(this.provider.apiGateway.restApiId === null ||  this.provider.apiGateway.restApiId === undefined)){
+            return this.provider.apiGateway.restApiId
+        }
+        else if ((!this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources)) &&
+            !(this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] === null ||
+            this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] === undefined)){
+            return this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'].Properties.Name;
+        }
+        else {
+            this.logger('Can not get API Gateway Name.')
+            return;
+        }
+    }
+    isNullOrUndefined(value) {
+        return value === null || value === undefined
+    }
+
 }
 
 module.exports = DashboardPlugin

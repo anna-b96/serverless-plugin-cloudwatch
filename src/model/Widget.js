@@ -73,7 +73,7 @@ class Widget {
         stat: 'Sum',
         view: this.view,
         stacked: false,
-        period: 60
+        period: 300 // with period 60 you pay for the metric
       }
     }
   }

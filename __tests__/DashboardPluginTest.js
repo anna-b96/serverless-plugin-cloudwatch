@@ -136,17 +136,17 @@ test('adding dashboard integration test', t => {
             'ProjectOverviewDashboard': {
                 Type: 'AWS::CloudWatch::Dashboard',
                 Properties: {
-                    DashboardName: 'project-name-dev',
+                    DashboardName: 'deployment-project-name',
                     DashboardBody: '{"widgets":' +
-                        '[{"type":"metric","width":24,"height":6,"properties":{"region":"eu-central-1","title":"Sum of Errors","metrics":' +
+                        '[{"type":"metric","width":24,"height":6,"properties":{"region":"eu-central-1","title":"Lambda: Sum of Errors","metrics":' +
                             '[["AWS/Lambda","Errors","FunctionName","function1",{"stat":"Sum"}],' +
                             '["AWS/Lambda","Errors","FunctionName","function2",{"stat":"Sum"}]],' +
-                        '"stat":"Sum","view":"timeSeries","stacked":false,"period":60}},' +
+                        '"stat":"Sum","view":"timeSeries","stacked":false,"period":300}},' +
 
-                        '{"type":"metric","width":24,"height":6,"properties":{"region":"eu-central-1","title":"Sum of Invocations","metrics":' +
+                        '{"type":"metric","width":24,"height":6,"properties":{"region":"eu-central-1","title":"Lambda: Sum of Invocations","metrics":' +
                             '[["AWS/Lambda","Invocations","FunctionName","function1",{"stat":"Sum"}],' +
                             '["AWS/Lambda","Invocations","FunctionName","function2",{"stat":"Sum"}]],' +
-                        '"stat":"Sum","view":"timeSeries","stacked":false,"period":60}}]}'
+                        '"stat":"Sum","view":"timeSeries","stacked":false,"period":300}}]}'
                 }
             }
         }
@@ -188,7 +188,6 @@ test('create dashboard with only lambda widgets', t => {
                 }
             },
             provider: {
-                stage: 'dev',
                 region: 'eu-central-1',
                 compiledCloudFormationTemplate: {
                     Resources: {
@@ -203,7 +202,7 @@ test('create dashboard with only lambda widgets', t => {
     const dashboard = dashboardPlugin.createDashboard()
     t.is(dashboard.Type, 'AWS::CloudWatch::Dashboard')
     t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets.length, 2)
-    t.deepEqual(dashboard.Properties.DashboardName, 'project-name-dev')
+    t.deepEqual(dashboard.Properties.DashboardName, 'deployment-project-name')
     t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets[0].properties.metrics[0][3], 'function1')
    //t.deepEqual(dashboard, '')
 })
@@ -293,7 +292,7 @@ test('create dashboard with dynamodb widgets and lambda widgets', t => {
     const dashboard = dashboardPlugin.createDashboard()
     t.is(dashboard.Type, 'AWS::CloudWatch::Dashboard')
     t.deepEqual(JSON.parse(dashboard.Properties.DashboardBody).widgets.length, 3)
-    t.deepEqual(dashboard.Properties.DashboardName, 'project-name-dev')
+    t.deepEqual(dashboard.Properties.DashboardName, 'deployment-project-name')
 })
 test('create dashboard with dynamodb widgets', t => {
     const serverless = {

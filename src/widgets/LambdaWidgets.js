@@ -33,7 +33,7 @@ class LambdaWidgets {
      * @returns {{width: number, type: string, properties: {stat: string, view: string, period: number, stacked: boolean, metrics: *, region: *, title: *}, height: number}}: one widget
      */
     perFunction (name, metrics) {
-        const widgetName = name;
+        const widgetName = 'Lambda: ' + name;
 
         var widgetMetrics = this.functionNames
             .map(functionName => this.getMetrics(functionName, metrics ))

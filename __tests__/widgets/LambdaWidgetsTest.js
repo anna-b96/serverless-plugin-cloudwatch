@@ -22,9 +22,8 @@ const lambdaConfig = {
     enabled: false
     // set here default, if no config is provided in serverless
 }
-
-
-test('create(): creating two lambda widgets', t => {
+// ---------------------------------- tests for create() ---------------------------------- //
+test('creating two lambda widgets', t => {
 
     const expected = [{
         type: 'metric',
@@ -32,13 +31,13 @@ test('create(): creating two lambda widgets', t => {
         height: 6,
         properties: {
             region: 'eu-central-1',
-            title: 'Errors widget',
+            title: 'Lambda: Errors widget',
             metrics: [['AWS/Lambda', 'Errors', 'FunctionName', 'function1', { 'stat': 'Sum' }],
                 ['AWS/Lambda', 'Errors', 'FunctionName', 'function2', { 'stat': 'Sum' }]],
             stat: 'Sum',
             view: 'timeSeries',
             stacked: false,
-            period: 60
+            period: 300
         }
     },
         {
@@ -47,13 +46,13 @@ test('create(): creating two lambda widgets', t => {
             height: 6,
             properties: {
                 region: 'eu-central-1',
-                title: 'Invocations widget',
+                title: 'Lambda: Invocations widget',
                 metrics: [['AWS/Lambda', 'Invocations', 'FunctionName', 'function1', { 'stat': 'Sum' }],
                     ['AWS/Lambda', 'Invocations', 'FunctionName', 'function2', { 'stat': 'Sum' }]],
                 stat: 'Sum',
                 view: 'timeSeries',
                 stacked: false,
-                period: 60
+                period: 300
             }
         }
     ]
@@ -62,8 +61,8 @@ test('create(): creating two lambda widgets', t => {
     t.deepEqual(result, expected )
 
 })
-
-test('test perFunction() with one function and one metric ', t => {
+// ---------------------------------- tests for perFunction() ---------------------------------- //
+test('with one function and one metric ', t => {
     const lambdaWidgets = new LambdaWidgets(logger, region, lambdaConfig, ['function1']);
     const result = lambdaWidgets.perFunction(lambdaConfig.widgets[0].name, lambdaConfig.widgets[0].metrics )
 
@@ -73,19 +72,19 @@ test('test perFunction() with one function and one metric ', t => {
         height: 6,
         properties: {
         region: 'eu-central-1',
-            title: 'Invocations widget',
+            title: 'Lambda: Invocations widget',
             metrics: [['AWS/Lambda', 'Invocations', 'FunctionName', 'function1', { 'stat': 'Sum' }]
                      ],
             stat: 'Sum',
             view: 'timeSeries',
             stacked: false,
-            period: 60
+            period: 300
         }
     };
 
     t.deepEqual(result, expected)
 })
-test('test perFunction() with two functions and two metrics', t => {
+test('with two functions and two metrics', t => {
     const lambdaWidgets = new LambdaWidgets(logger, region, lambdaConfig, ['function1', 'function2']);
     const result = lambdaWidgets.perFunction(lambdaConfig.widgets[0].name, lambdaConfig.widgets[0].metrics )
 
@@ -95,13 +94,13 @@ test('test perFunction() with two functions and two metrics', t => {
         height: 6,
         properties: {
             region: 'eu-central-1',
-            title: 'Invocations widget',
+            title: 'Lambda: Invocations widget',
             metrics: [['AWS/Lambda', 'Invocations', 'FunctionName', 'function1', { 'stat': 'Sum' }],
                 ['AWS/Lambda', 'Invocations', 'FunctionName', 'function2', { 'stat': 'Sum' }]],
             stat: 'Sum',
             view: 'timeSeries',
             stacked: false,
-            period: 60
+            period: 300
         }
     };
 
