@@ -20,10 +20,9 @@ class DashboardPlugin {
      * */
     constructor(serverless, options) {
         this.logger = msg => serverless.cli.log('[serverless-plugin-cloudwatch]: ' + msg);
-        // Serverless service: whole serverless.yml
+        // serverless service: whole serverless.yml
         this.service = serverless.service;
         this.options = options;
-        // for ex, eu-central-1
         this.provider = this.service.provider;
         this.region = this.provider.region;
 
@@ -32,14 +31,13 @@ class DashboardPlugin {
             everything in the Serverless Framework is implemented as commands (for ex. serverless deploy),
             that trigger hooks and lifecycle events. A lifecycle event represents a part of what a command is built to do.
             Serverless can be extended either by adding new commands or by hooking external actions into lifecycle events of existing ones.
-            better 'before:deploy:finalize' ??
             */
             'before:package:finalize': () => this.addDashboard()
         }
     }
 
     /**
-     *  adds a dashboard resource to the cloudformation template, stored in the serverless object
+     *  adds a dashboard resource to the CloudFormationTemplate, stored in the serverless object
      */
     addDashboard() {
         const dashboard = this.createDashboard();
@@ -49,7 +47,6 @@ class DashboardPlugin {
             dashboardResource[resourceName] = dashboard;
             const template = this.provider.compiledCloudFormationTemplate;
             template.Resources = Object.assign(dashboardResource, template.Resources);
-            this.logger(`Dev Log: template ${JSON.stringify(template.Resources)}`)
             this.provider.compiledCloudFormationTemplate = template;
         } else {
             this.logger('No dashboard has been added.')
@@ -57,7 +54,7 @@ class DashboardPlugin {
     }
 
     /**
-     *  gets the config for each aws service, the resources for s3 and dynamoDB and all lambda functions
+     *  gets the config for each aws service, the resources for s3 and dynamoDB, the api gateway name and all lambda functions
      *  @returns {Object} dashboard
      */
     createDashboard() {
@@ -76,13 +73,13 @@ class DashboardPlugin {
         const functions = this.service.functions || {};
 
         // get apiGateway name
-        this.apiGatewayName = this.getApiGatewayName();
+        this.apiGatewayName = this.getApiGatewayName() || {};
 
         // get deployment stage
         this.stage = this.getDeploymentStage();
 
         // create new dashboard (only one for the current stage)
-        this.logger(`Creating dashboard for deployment stage ${this.stage} and `)
+        this.logger(`Creating dashboard for projects ${this.stage} stage`)
         const widgetFactory = new WidgetFactory(this.logger, this.region, dynamoDBConfig, lambdaConfig, s3Config, apiGatewayConfig, cfResources, functions, this.apiGatewayName);
         const dashboardWidgets = widgetFactory.createWidgets();
         this.logger(`Adding ${dashboardWidgets.length} widgets to the dashboard...`)
@@ -90,22 +87,23 @@ class DashboardPlugin {
             const dashboardName = this.stage + '-' + this.service.service;
             const dashboardFactory = new Dashboard(this.logger, dashboardName, dashboardWidgets);
             const dashboard = dashboardFactory.create();
-            this.logger(`Dev Log: Dashboard ${JSON.stringify(dashboard)}`)
+            this.logger(`Adding dashboard: ${JSON.stringify(dashboard)}`)
             return dashboard;
         }
         return {}
     }
 
     /**
-     * gets the custom dashboard config from the serverless object
+     * get the custom dashboard config from the serverless object
      * @returns {Object} dashboard config
      */
     getDashboardConfig() {
         const customConfig = this.service.custom || {};
         return customConfig.dashboard || {};
     }
+
     /**
-     * Get the stage properly resolved. Only when deployment command is done with option --stage
+     * get the stage properly resolved. Only when deployment command is done with option --stage
      * See https://github.com/serverless/serverless/issues/2631
      *
      * @return {string} - Stage option
@@ -115,28 +113,19 @@ class DashboardPlugin {
         if (!this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources) && !this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`])) {
             apiGatewayDeploymentResource = this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`].Properties.Name
         }
-        return this.options.stage || apiGatewayDeploymentResource ||'deployment'
+        return this.options.stage || apiGatewayDeploymentResource || 'deployment'
     }
 
     /**
-     * Gets api gateway name either from provider config or from compiledCloudFormationTemplate
-     * @returns {string | undefined} - Api Gateway name
+     * get api gateway name either from provider config or from compiledCloudFormationTemplate
+     * @returns {string | undefined} - ApiGateway name
      */
     getApiGatewayName() {
-        if ((!this.isNullOrUndefined(this.provider.apiGateway)) &&
-            !(this.provider.apiGateway.restApiId === null ||  this.provider.apiGateway.restApiId === undefined)){
-            return this.provider.apiGateway.restApiId
-        }
-        else if ((!this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources)) &&
-            !(this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] === null ||
-            this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'] === undefined)){
-            return this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'].Properties.Name;
-        }
-        else {
-            this.logger('Can not get API Gateway Name.')
-            return;
-        }
+        return ObjectUtil.getSafe(this.provider.apiGateway.restApiId) ||
+            ObjectUtil.getSafe(this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'].Properties.Name);
+
     }
+
     isNullOrUndefined(value) {
         return value === null || value === undefined
     }
