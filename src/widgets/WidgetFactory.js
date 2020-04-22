@@ -28,7 +28,7 @@ class WidgetFactory {
     }
 
     /**
-     *
+     * create lambda widgets if there are function/s with enabeled dashboard
      * @returns {Array|[]}
      */
     createLambdaWidgets() {
@@ -43,14 +43,14 @@ class WidgetFactory {
     }
 
     /**
-     *
+     * create s3 widgets if dashboard is enabled for s3 and there exists at least one bucket
      * @returns {Array|[]}
      */
     createS3Widgets() {
         const s3Config = this.getS3Config();
         const bucketNames = this.getBucketNames();
 
-        if (s3Config.enabled === true && ArrayUtil.notEmpty(bucketNames)) {
+        if (ObjectUtil.getSafe(() => s3Config.enabled) === true && ArrayUtil.notEmpty(bucketNames)) {
             return this.doCreateS3Widgets(bucketNames, s3Config)
         } else {
             return []
@@ -58,15 +58,15 @@ class WidgetFactory {
     }
 
     /**
-     *
-     * @returns {*[]|*}
+     * create dynamoDB widgets if dashboard is enabled for dynamoDB and there exists at least one table
+     * @returns {Array|[]}
      */
     createDynamoDBWidgets() {
         const dynamoDBConfig = this.getDynamoDBConfig();
         const tableNames = this.getTableNames();
         const globalSecondaryIndexNames = this.getGlobalSecondaryIndexNames();
 
-        if (dynamoDBConfig.enabled === true && ArrayUtil.notEmpty(tableNames)) {
+        if (ObjectUtil.getSafe(() => dynamoDBConfig.enabled) === true && ArrayUtil.notEmpty(tableNames)) {
             return this.doCreateDynamoDBWidgets(dynamoDBConfig, tableNames, globalSecondaryIndexNames)
         } else {
             return []
@@ -74,13 +74,13 @@ class WidgetFactory {
     }
 
     /**
-     *
-     * @returns {*[]|*}
+     * create dynamoDB widgets if dashboard is enabled for apiGateway and apiGatewayName could have been extracted
+     * @returns {Array|[]}
      */
     createApiGatewayWidgets() {
         const apiGatewayConfig = this.getApiGatewayConfig();
 
-        if (apiGatewayConfig.enabled === true && !ObjectUtil.isEmpty(this.apiGatewayName)) {
+        if (ObjectUtil.getSafe(apiGatewayConfig.enabled) === true && !ObjectUtil.isEmpty(this.apiGatewayName)) {
             return this.doCreateApiGatewayWidgets(apiGatewayConfig)
         } else {
             return []
@@ -88,7 +88,7 @@ class WidgetFactory {
     }
 
     /**
-     *
+     * create s3 widgets
      * @param bucketNames
      * @param s3Config
      * @returns {*}
@@ -100,12 +100,25 @@ class WidgetFactory {
         return widgets;
     }
 
+    /**
+     * create dynamoDB widgets
+     * @param dynamoDBConfig
+     * @param tableNames
+     * @param globalSecondaryIndexNames
+     * @returns {*}
+     */
     doCreateDynamoDBWidgets(dynamoDBConfig, tableNames, globalSecondaryIndexNames) {
         const widgetFactory = new DynamoDBWidgets(this.logger, this.region, dynamoDBConfig, tableNames, globalSecondaryIndexNames)
         const widgets = widgetFactory.create()
         return widgets;
     }
 
+    /**
+     * create lambda widgets
+     * @param functionNames
+     * @param lambdaConfig
+     * @returns {Array}
+     */
     doCreateLambdaWidgets(functionNames, lambdaConfig) {
         const widgetFactory = new LambdaWidgets(this.logger, this.region, lambdaConfig, functionNames)
         const widgets = widgetFactory.create();
@@ -113,6 +126,10 @@ class WidgetFactory {
         return widgets;
     }
 
+    /**
+     * create apiGateway widgets
+     * @param apiGatewayConfig
+     */
     doCreateApiGatewayWidgets(apiGatewayConfig) {
         const widgetFactory = new ApiGatewayWidgets(this.logger, this.region, apiGatewayConfig, this.apiGatewayName)
         const widgets = widgetFactory.create();
@@ -148,13 +165,16 @@ class WidgetFactory {
         if (ObjectUtil.isEmpty(this.lambdaConfig)) {
             return {enabled: false}
         }
-        if (ArrayUtil.notEmpty(this.lambdaConfig.widgets)) {
+        if (ArrayUtil.notEmpty(ObjectUtil.getSafe(() => this.lambdaConfig.widgets))) {
             return this.lambdaConfig;
         }
         return defaultConfig;
 
     }
-
+    /**
+     * @returns {Object} returns either a default configuration (if s3 dashboard is enabled, but no custom configuration provided)
+     *                   OR a configuration with disabled flag OR the provided custom configuration
+     */
     getS3Config() {
         const defaultConfig = {
             widgets: [
@@ -176,12 +196,16 @@ class WidgetFactory {
         if (ObjectUtil.isEmpty(this.s3Config)) {
             return {enabled: false}
         }
-        if (ArrayUtil.notEmpty(this.s3Config.widgets)) {
+        if (ArrayUtil.notEmpty(ObjectUtil.getSafe(this.s3Config.widgets))) {
             return this.s3Config;
         }
         return defaultConfig;
     }
 
+    /**
+     * @returns {Object} returns either a default configuration (if dynamoDB dashboard is enabled, but no custom configuration provided)
+     *                   OR a configuration with disabled flag OR the provided custom configuration
+     */
     getDynamoDBConfig() {
         const defaultConfig = {
             widgets: [
@@ -203,12 +227,16 @@ class WidgetFactory {
         if (ObjectUtil.isEmpty(this.dynamoDBConfig)) {
             return {enabled: false}
         }
-        if (ArrayUtil.notEmpty(this.dynamoDBConfig.widgets)) {
+        if (ArrayUtil.notEmpty(ObjectUtil.getSafe(() => this.dynamoDBConfig.widgets))) {
             return this.dynamoDBConfig;
         }
         return defaultConfig;
     }
 
+    /**
+     * @returns {Object} returns either a default configuration (if apiGateway dashboard is enabled, but no custom configuration provided)
+     *                   OR a configuration with disabled flag OR the provided custom configuration
+     */
     getApiGatewayConfig() {
         const defaultConfig = {
             widgets: [
@@ -230,12 +258,16 @@ class WidgetFactory {
         if (ObjectUtil.isEmpty(this.apiGatewayConfig)) {
             return {enabled: false}
         }
-        if (ArrayUtil.notEmpty(this.apiGatewayConfig.widgets)) {
+        if (ArrayUtil.notEmpty(ObjectUtil.getSafe(() => this.apiGatewayConfig.widgets))) {
             return this.apiGatewayConfig;
         }
         return defaultConfig;
     }
 
+    /**
+     * get all aws resources from type table
+     * @returns {Array|[]} dynamoDB tables
+     */
     getTableNames() {
         if (ObjectUtil.isEmpty(this.resources)) {
             return []
@@ -246,6 +278,10 @@ class WidgetFactory {
             .map(key => this.resources[key].Properties.TableName)
     }
 
+    /**
+     * get all aws resources from type bucket
+     * @returns {Array|[]} s3 buckets
+     */
     getBucketNames() {
         if (ObjectUtil.isEmpty(this.resources)) {
             return []
@@ -256,6 +292,10 @@ class WidgetFactory {
             .map(key => this.resources[key].Properties.BucketName)
     }
 
+    /**
+     * gets all existing indexNames for each dynamoDB table
+     * @returns {Object|{}}
+     */
     getGlobalSecondaryIndexNames() {
         return Object
             .keys(this.resources)
@@ -269,6 +309,10 @@ class WidgetFactory {
             }, {})
     }
 
+    /**
+     * gets all enabled lambda functions
+     * @returns {Array|[]}
+     */
     getFunctionNames() {
         const allEnabled = this.getLambdaConfig().enabled;
         const isEnabled = functionEnabled => (allEnabled && functionEnabled !== false) || functionEnabled;

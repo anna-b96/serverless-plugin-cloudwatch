@@ -23,8 +23,6 @@ class DashboardPlugin {
         // serverless service: whole serverless.yml
         this.service = serverless.service;
         this.options = options;
-        this.provider = this.service.provider;
-        this.region = this.provider.region;
 
         this.hooks = {
             /*
@@ -40,6 +38,9 @@ class DashboardPlugin {
      *  adds a dashboard resource to the CloudFormationTemplate, stored in the serverless object
      */
     addDashboard() {
+        this.provider = this.service.provider;
+        this.region = this.provider.region || {};
+
         const dashboard = this.createDashboard();
         if (!ObjectUtil.isEmpty(dashboard)) {
             const resourceName = 'ProjectOverviewDashboard';
@@ -109,11 +110,7 @@ class DashboardPlugin {
      * @return {string} - Stage option
      * */
     getDeploymentStage() {
-        let apiGatewayDeploymentResource = undefined;
-        if (!this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources) && !this.isNullOrUndefined(this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`])) {
-            apiGatewayDeploymentResource = this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`].Properties.Name
-        }
-        return this.options.stage || apiGatewayDeploymentResource || 'deployment'
+        return this.options.stage || ObjectUtil.getSafe(() => this.provider.compiledCloudFormationTemplate.Resources[`ApiGatewayDeploment(\\d+)`].Properties.Name) || 'deployment'
     }
 
     /**
@@ -121,13 +118,8 @@ class DashboardPlugin {
      * @returns {string | undefined} - ApiGateway name
      */
     getApiGatewayName() {
-        return ObjectUtil.getSafe(this.provider.apiGateway.restApiId) ||
-            ObjectUtil.getSafe(this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'].Properties.Name);
-
-    }
-
-    isNullOrUndefined(value) {
-        return value === null || value === undefined
+        return ObjectUtil.getSafe(() => this.provider.apiGateway.restApiId) ||
+            ObjectUtil.getSafe(() => this.provider.compiledCloudFormationTemplate.Resources['ApiGatewayRestApi'].Properties.Name);
     }
 
 }
