@@ -50,7 +50,7 @@ class Widget {
 
   create () {
     try {
-      this.logger(`Dev Log: ${this.metrics[1][3]}`)
+      this.logger(`Dev Log: create Widget with metrics: ${JSON.stringify(this.metrics)}`)
     }
     catch(err) {
       this.logger(`Dev Log: Error Widgets`)

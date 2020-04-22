@@ -32,7 +32,7 @@ class S3Widgets {
             if (oneMetric.dimension === null || oneMetric.dimension === undefined) {
                 acc.unshift(this.getMetricAcrossAll(oneMetric))
             } else {
-                this.logger('You have entered a non valid dimension')
+                this.logger(`S3: You have entered a non valid dimension ${oneMetric.dimension}`)
             }
             return acc
         }, [])

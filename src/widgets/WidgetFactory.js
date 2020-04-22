@@ -3,6 +3,7 @@
 const DynamoDBWidgets = require('./DynamoDBWidgets')
 const LambdaWidgets = require('./LambdaWidgets')
 const ApiGatewayWidgets = require('./ApiGatewayWidgets')
+const S3Widgets = require('./S3Widgets')
 const ArrayUtil = require('../utils/ArrayUtil')
 const ObjectUtil = require('../utils/ObjectUtil')
 
